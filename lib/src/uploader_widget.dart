@@ -29,7 +29,7 @@ class FirebaseUploader extends StatefulWidget {
   final Map<String, String>? customMetadata;
 
   const FirebaseUploader({
-    Key? key,
+    super.key,
     this.allowedExtensions = const [],
     required this.firestorePath,
     required this.firebaseStoragePath,
@@ -45,7 +45,7 @@ class FirebaseUploader extends StatefulWidget {
     this.headerBuilder,
     this.emptyStateBuilder,
     this.customMetadata,
-  }) : super(key: key);
+  });
 
   @override
   State<FirebaseUploader> createState() => _FirebaseUploaderState();
@@ -552,11 +552,12 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
           documentId: upload.id,
           firestorePath: widget.firestorePath,
         );
-
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Deleted ${upload.fileName}')),
         );
       } catch (e) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to delete file: $e'),

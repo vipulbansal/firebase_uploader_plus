@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'models/upload_metadata.dart';
-import 'utils/path_builder.dart';
+
 
 class FirestoreService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -291,7 +291,7 @@ class FirestoreService {
 
       // Calculate statistics
       int totalFiles = uploads.length;
-      int totalSize = uploads.fold(0, (sum, upload) => sum + upload.fileSizeBytes);
+      int totalSize = uploads.fold(0, (summ, upload) => summ + upload.fileSizeBytes);
       
       Map<String, int> typeCount = {};
       for (final upload in uploads) {
