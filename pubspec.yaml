@@ -45,3 +45,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+funding:
+  - https://paypal.me/vipulbansal?country.x=IN&locale.x=en_GB
