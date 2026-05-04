@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
@@ -23,7 +24,7 @@ class FirebaseStorageHelper {
       );
 
       final ref = _storage.ref().child(fullPath);
-      
+
       // Set metadata
       final metadata = SettableMetadata(
         contentType: _getContentType(fileName),
@@ -32,13 +33,20 @@ class FirebaseStorageHelper {
 
       final uploadTask = ref.putFile(file, metadata);
 
-      // Track upload progress
-      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        final progress = snapshot.bytesTransferred / snapshot.totalBytes;
+      final progressSub = uploadTask.snapshotEvents.listen((
+        TaskSnapshot snapshot,
+      ) {
+        final total = snapshot.totalBytes;
+        final progress = total > 0 ? snapshot.bytesTransferred / total : 0.0;
         onProgress?.call(progress);
       });
 
-      final snapshot = await uploadTask;
+      TaskSnapshot snapshot;
+      try {
+        snapshot = await uploadTask;
+      } finally {
+        await progressSub.cancel();
+      }
       final downloadUrl = await snapshot.ref.getDownloadURL();
       final fileStats = await file.stat();
 
@@ -118,7 +126,7 @@ class FirebaseStorageHelper {
     }
   }
 
-  /// Upload multiple files with batch progress tracking
+  /// Uploads files in order; stops and rethrows on the first failure.
   static Future<List<UploadMetadata>> uploadMultipleFiles({
     required List<File> files,
     required String storagePath,
@@ -139,12 +147,11 @@ class FirebaseStorageHelper {
           },
           customMetadata: customMetadata,
         );
-        
+
         results.add(result);
         completed++;
         onBatchProgress?.call(completed, files.length);
       } catch (e) {
-        // Continue with other files even if one fails
         completed++;
         onBatchProgress?.call(completed, files.length);
         rethrow;
@@ -179,7 +186,7 @@ class FirebaseStorageHelper {
   /// Get content type based on file extension
   static String _getContentType(String fileName) {
     final extension = path.extension(fileName).toLowerCase();
-    
+
     switch (extension) {
       case '.jpg':
       case '.jpeg':

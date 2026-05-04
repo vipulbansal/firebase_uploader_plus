@@ -66,15 +66,15 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
           widget.headerBuilder!(context)
         else
           _buildDefaultHeader(),
-        
+
         if (_isUploading) _buildUploadProgress(),
-        
+
         Expanded(
           child: StreamBuilder<List<UploadMetadata>>(
             stream: FirestoreService.streamUploads(
               firestorePath: widget.firestorePath,
-              filterByUser: widget.filterByCurrentUser 
-                  ? FirebaseAuth.instance.currentUser?.uid 
+              filterByUser: widget.filterByCurrentUser
+                  ? FirebaseAuth.instance.currentUser?.uid
                   : null,
             ),
             builder: (context, snapshot) {
@@ -89,8 +89,8 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
               final uploads = snapshot.data ?? [];
 
               if (uploads.isEmpty) {
-                return widget.emptyStateBuilder?.call(context) ?? 
-                       _buildEmptyState();
+                return widget.emptyStateBuilder?.call(context) ??
+                    _buildEmptyState();
               }
 
               return _buildFilesList(uploads);
@@ -112,9 +112,9 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
                 child: ElevatedButton.icon(
                   onPressed: _isUploading ? null : _pickFiles,
                   icon: const Icon(Icons.attach_file),
-                  label: Text(widget.enableMultipleFiles 
-                      ? 'Pick Files' 
-                      : 'Pick File'),
+                  label: Text(
+                    widget.enableMultipleFiles ? 'Pick Files' : 'Pick File',
+                  ),
                 ),
               ),
               if (widget.enableCamera) ...[
@@ -131,9 +131,9 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
             const SizedBox(height: 8),
             Text(
               'Allowed: ${widget.allowedExtensions.join(", ")}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
           ],
         ],
@@ -176,9 +176,7 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 
   Widget _buildErrorState(String error) {
@@ -208,24 +206,20 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.cloud_upload_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.cloud_upload_outlined, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No files uploaded yet',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
             'Tap the button above to upload your first file',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[500],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
           ),
         ],
       ),
@@ -237,8 +231,8 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
       itemCount: uploads.length,
       itemBuilder: (context, index) {
         final upload = uploads[index];
-        return widget.fileTileBuilder?.call(context, upload) ?? 
-               _buildDefaultFileTile(upload);
+        return widget.fileTileBuilder?.call(context, upload) ??
+            _buildDefaultFileTile(upload);
       },
     );
   }
@@ -258,10 +252,7 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
             Text('${upload.formattedFileSize} • ${upload.fileType}'),
             Text(
               _formatDate(upload.timestamp),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -354,7 +345,7 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
     }
 
     return CircleAvatar(
-      backgroundColor: iconColor.withOpacity(0.1),
+      backgroundColor: iconColor.withValues(alpha: 0.1),
       child: Icon(iconData, color: iconColor),
     );
   }
@@ -363,11 +354,11 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
     try {
       final result = await FilePicker.platform.pickFiles(
         allowMultiple: widget.enableMultipleFiles,
-        allowedExtensions: widget.allowedExtensions.isNotEmpty 
-            ? widget.allowedExtensions 
+        allowedExtensions: widget.allowedExtensions.isNotEmpty
+            ? widget.allowedExtensions
             : null,
-        type: widget.allowedExtensions.isNotEmpty 
-            ? FileType.custom 
+        type: widget.allowedExtensions.isNotEmpty
+            ? FileType.custom
             : FileType.any,
       );
 
@@ -404,7 +395,7 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
   Future<void> _uploadFiles(List<File> files) async {
     // Check connectivity
     final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
+    if (connectivityResult.contains(ConnectivityResult.none)) {
       widget.onUploadError?.call('No internet connection');
       return;
     }
@@ -426,7 +417,9 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
       for (int i = 0; i < files.length; i++) {
         final file = files[i];
         setState(() {
-          _uploadingFileName = PathBuilder.sanitizeFileName(file.path.split('/').last);
+          _uploadingFileName = PathBuilder.sanitizeFileName(
+            file.path.split('/').last,
+          );
         });
 
         // Upload to Firebase Storage
@@ -468,7 +461,7 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
       final fileSize = file.lengthSync();
       if (fileSize > widget.maxFileSize!) {
         widget.onUploadError?.call(
-          'File too large. Maximum size: ${(widget.maxFileSize! / (1024 * 1024)).toStringAsFixed(1)} MB'
+          'File too large. Maximum size: ${(widget.maxFileSize! / (1024 * 1024)).toStringAsFixed(1)} MB',
         );
         return false;
       }
@@ -478,7 +471,7 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
     final fileName = file.path.split('/').last;
     if (!PathBuilder.isAllowedExtension(fileName, widget.allowedExtensions)) {
       widget.onUploadError?.call(
-        'File type not allowed. Allowed: ${widget.allowedExtensions.join(", ")}'
+        'File type not allowed. Allowed: ${widget.allowedExtensions.join(", ")}',
       );
       return false;
     }
@@ -518,9 +511,9 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
 
   void _shareFile(UploadMetadata upload) {
     // Implement sharing functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Share: ${upload.fileName}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Share: ${upload.fileName}')));
   }
 
   Future<void> _deleteFile(UploadMetadata upload) async {
@@ -546,18 +539,18 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
       try {
         // Delete from Firebase Storage
         await FirebaseStorageHelper.deleteFile(upload.storagePath);
-        
+
         // Delete metadata from Firestore
         await FirestoreService.deleteUploadMetadata(
           documentId: upload.id,
           firestorePath: widget.firestorePath,
         );
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Deleted ${upload.fileName}')),
-        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Deleted ${upload.fileName}')));
       } catch (e) {
-        if (!context.mounted) return;
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to delete file: $e'),
@@ -593,9 +586,9 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
                     ? CachedNetworkImage(
                         imageUrl: upload.downloadUrl,
                         fit: BoxFit.contain,
-                        placeholder: (context, url) => 
+                        placeholder: (context, url) =>
                             const Center(child: CircularProgressIndicator()),
-                        errorWidget: (context, url, error) => 
+                        errorWidget: (context, url, error) =>
                             const Center(child: Icon(Icons.error)),
                       )
                     : Center(

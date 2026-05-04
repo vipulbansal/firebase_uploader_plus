@@ -26,17 +26,24 @@ class UploadMetadata {
   });
 
   factory UploadMetadata.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final raw = doc.data();
+    if (raw is! Map<String, dynamic>) {
+      throw StateError('Document ${doc.id} has no map payload');
+    }
+    return UploadMetadata.fromMap(doc.id, raw);
+  }
+
+  factory UploadMetadata.fromMap(String id, Map<String, dynamic> data) {
     return UploadMetadata(
-      id: doc.id,
-      fileName: data['fileName'] ?? '',
-      downloadUrl: data['downloadUrl'] ?? '',
-      uploadedBy: data['uploadedBy'] ?? '',
+      id: id,
+      fileName: data['fileName'] as String? ?? '',
+      downloadUrl: data['downloadUrl'] as String? ?? '',
+      uploadedBy: data['uploadedBy'] as String? ?? '',
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      fileType: data['fileType'] ?? '',
-      fileSizeBytes: data['fileSizeBytes'] ?? 0,
-      storagePath: data['storagePath'] ?? '',
-      isDeleted: data['isDeleted'] ?? false,
+      fileType: data['fileType'] as String? ?? '',
+      fileSizeBytes: (data['fileSizeBytes'] as num?)?.toInt() ?? 0,
+      storagePath: data['storagePath'] as String? ?? '',
+      isDeleted: data['isDeleted'] as bool? ?? false,
       customMetadata: data['customMetadata'] as Map<String, dynamic>?,
     );
   }

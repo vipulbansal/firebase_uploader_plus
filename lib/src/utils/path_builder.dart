@@ -13,7 +13,7 @@ class PathBuilder {
   }) {
     final cleanBasePath = basePath.replaceAll(RegExp(r'^/+|/+$'), '');
     final uid = userId ?? FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-    
+
     String finalFileName = fileName;
     if (includeTimestamp) {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -21,8 +21,20 @@ class PathBuilder {
       final nameWithoutExt = path.basenameWithoutExtension(fileName);
       finalFileName = '${nameWithoutExt}_$timestamp$extension';
     }
-    
+
     return '$cleanBasePath/$uid/$finalFileName';
+  }
+
+  /// Date-only path segments: `{basePath}/{year}/{month}/{day}`.
+  static String buildDateOrganizedPath({
+    required String basePath,
+    required DateTime date,
+  }) {
+    final cleanBasePath = basePath.replaceAll(RegExp(r'^/+|/+$'), '');
+    final y = date.year.toString();
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$cleanBasePath/$y/$m/$d';
   }
 
   /// Builds a collection path for Firestore metadata storage
@@ -39,7 +51,7 @@ class PathBuilder {
   static String sanitizeFileName(String fileName) {
     // Remove or replace unsafe characters
     String sanitized = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
-    
+
     // Limit length to prevent issues
     if (sanitized.length > 255) {
       final extension = path.extension(sanitized);
@@ -47,27 +59,24 @@ class PathBuilder {
       final maxNameLength = 255 - extension.length;
       sanitized = '${nameWithoutExt.substring(0, maxNameLength)}$extension';
     }
-    
+
     return sanitized;
   }
 
   /// Generates a unique document ID for Firestore
-  static String generateDocumentId({
-    String? userId,
-    String? fileName,
-  }) {
+  static String generateDocumentId({String? userId, String? fileName}) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final uid = userId ?? FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
     final shortUid = uid.length > 8 ? uid.substring(0, 8) : uid;
-    
+
     if (fileName != null) {
       final nameWithoutExt = path.basenameWithoutExtension(fileName);
-      final shortName = nameWithoutExt.length > 20 
-          ? nameWithoutExt.substring(0, 20) 
+      final shortName = nameWithoutExt.length > 20
+          ? nameWithoutExt.substring(0, 20)
           : nameWithoutExt;
       return '${shortUid}_${shortName}_$timestamp';
     }
-    
+
     return '${shortUid}_$timestamp';
   }
 
@@ -83,13 +92,13 @@ class PathBuilder {
   }) {
     final cleanBasePath = basePath.replaceAll(RegExp(r'^/+|/+$'), '');
     final uid = userId ?? FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-    
+
     List<String> pathSegments = [cleanBasePath];
-    
+
     if (category != null && category.isNotEmpty) {
       pathSegments.add(category.toLowerCase().replaceAll(' ', '_'));
     }
-    
+
     if (includeDate) {
       final now = DateTime.now();
       pathSegments.addAll([
@@ -97,9 +106,9 @@ class PathBuilder {
         now.month.toString().padLeft(2, '0'),
       ]);
     }
-    
+
     pathSegments.add(uid);
-    
+
     String finalFileName = sanitizeFileName(fileName);
     if (includeTimestamp) {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -107,16 +116,16 @@ class PathBuilder {
       final nameWithoutExt = path.basenameWithoutExtension(finalFileName);
       finalFileName = '${nameWithoutExt}_$timestamp$extension';
     }
-    
+
     pathSegments.add(finalFileName);
-    
+
     return pathSegments.join('/');
   }
 
   /// Extracts metadata from a storage path
   static Map<String, String?> parseStoragePath(String storagePath) {
     final segments = storagePath.split('/');
-    
+
     return {
       'basePath': segments.isNotEmpty ? segments[0] : null,
       'userId': segments.length > 1 ? segments[1] : null,
@@ -127,21 +136,27 @@ class PathBuilder {
   }
 
   /// Check if a file extension is allowed
-  static bool isAllowedExtension(String fileName, List<String> allowedExtensions) {
+  static bool isAllowedExtension(
+    String fileName,
+    List<String> allowedExtensions,
+  ) {
     if (allowedExtensions.isEmpty) return true;
-    
+
     final extension = path.extension(fileName).toLowerCase();
-    return allowedExtensions.any((ext) => 
-        extension == (ext.startsWith('.') ? ext.toLowerCase() : '.${ext.toLowerCase()}'));
+    return allowedExtensions.any(
+      (ext) =>
+          extension ==
+          (ext.startsWith('.') ? ext.toLowerCase() : '.${ext.toLowerCase()}'),
+    );
   }
 
   /// Get file type category based on extension
   static String getFileType(String fileName) {
     final extension = path.extension(fileName).toLowerCase();
-    
+
     switch (extension) {
       case '.pdf':
-        return 'document';
+        return 'pdf';
       case '.doc':
       case '.docx':
         return 'document';
@@ -177,7 +192,7 @@ class PathBuilder {
   /// Get MIME type for a file
   static String getMimeType(String fileName) {
     final extension = path.extension(fileName).toLowerCase();
-    
+
     switch (extension) {
       case '.pdf':
         return 'application/pdf';

@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-05-04
+
+### Changed
+- Require Dart `>=3.11.0` and Flutter `>=3.41.7`.
+- Pub.dev `description` tightened; dropped unused direct `mime` dependency (still available transitively where needed).
+- MIT `LICENSE` copyright line updated.
+- `PathBuilder.getFileType` now returns `pdf` for `.pdf` files (aligned with list UI and Firestore `fileType`).
+- `FirestoreService.streamUploads`: when `filterByUser` is `null`, queries are no longer implicitly scoped to the signed-in user (matches `FirebaseUploader` `filterByCurrentUser: false`).
+
+### Added
+- `PathBuilder.buildDateOrganizedPath`.
+- `UploadMetadata.fromMap` for tests and non-Firestore construction.
+
+### Fixed
+- `connectivity_plus` v6: `checkConnectivity()` returns a `List<ConnectivityResult>`; offline detection updated accordingly.
+- Upload progress listener is cancelled after the upload task completes; avoid divide-by-zero when `totalBytes` is 0.
+- `UploadMetadata.fromFirestore` validates map-shaped document data.
+- Example app declares `firebase_core`, `firebase_auth`, and `firebase_uploader_plus` as runtime dependencies.
+
 ## [1.0.0] - 2024-01-15
 
 ### Added

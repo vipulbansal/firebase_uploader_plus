@@ -1,6 +1,9 @@
 name: firebase_uploader_plus
-description: All-in-One Firebase File & Metadata Uploader with Firestore integration, real-time streams, and smart auto-pathing. Upload files with progress tracking, camera capture, and automatic metadata management.
-version: 1.0.0
+description: >-
+  Flutter package for Firebase Storage uploads with Firestore metadata,
+  streams, path helpers, file and camera picking, progress callbacks,
+  and a customizable upload list widget.
+version: 1.1.0
 homepage: https://github.com/vipulbansal/firebase_uploader_plus
 repository: https://github.com/vipulbansal/firebase_uploader_plus
 issue_tracker: https://github.com/vipulbansal/firebase_uploader_plus/issues
@@ -14,8 +17,8 @@ topics:
   - file-picker
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
-  flutter: ">=3.0.0"
+  sdk: '>=3.11.0 <4.0.0'
+  flutter: '>=3.41.7'
 
 dependencies:
   flutter:
@@ -33,14 +36,13 @@ dependencies:
   
   # UI & Utilities
   path: ^1.9.1
-  mime: ^2.0.0
   connectivity_plus: ^6.1.4
   cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

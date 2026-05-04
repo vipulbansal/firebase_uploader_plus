@@ -20,7 +20,7 @@ A powerful, customizable Flutter widget that handles file uploads to Firebase St
 - 📷 Capture or pick images via camera/gallery
 - 🧠 Smart auto-pathing (`uploads/users/{uid}/{timestamp}_{filename}`)
 - 📊 Real-time progress bar during upload
-- 🔁 Retry upload on failure
+- 🔁 You can retry failed uploads from your own code using the callbacks
 - ✅ Success and failure callbacks
 - 🔒 File size and type validation
 - 📦 Multiple file upload support
@@ -53,13 +53,18 @@ A powerful, customizable Flutter widget that handles file uploads to Firebase St
 
 ## 🚀 Getting Started
 
+### Requirements
+
+- **Dart** `>=3.11.0`
+- **Flutter** `>=3.41.7`
+
 ### Installation
 
 Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  firebase_uploader_plus: ^1.0.0
+  firebase_uploader_plus: ^1.1.0
 ```
 
 ### Firebase Setup
@@ -223,7 +228,7 @@ FirebaseUploader(
 | `enablePreview` | `bool` | `true` | Enable file preview functionality |
 | `enableCamera` | `bool` | `true` | Show camera capture button |
 | `enableMultipleFiles` | `bool` | `false` | Allow multiple file selection |
-| `filterByCurrentUser` | `bool` | `true` | Filter files by current user |
+| `filterByCurrentUser` | `bool` | `true` | When `true`, only lists files where `uploadedBy` matches the signed-in user. When `false`, lists **all** documents in the collection (no `uploadedBy` filter); use only with paths and security rules you trust. |
 | `maxFileSize` | `int?` | `null` | Maximum file size in bytes |
 | `onUploadComplete` | `Function(UploadMetadata)?` | `null` | Callback on successful upload |
 | `onUploadError` | `Function(String)?` | `null` | Callback on upload error |
@@ -285,9 +290,10 @@ FirebaseUploader(
 
 The package includes built-in connectivity checking:
 
-- Validates internet connection before upload
-- Shows appropriate error messages for offline state
-- Automatically retries failed uploads when connection restored
+- Validates internet connection **before** starting an upload
+- Surfaces an error via `onUploadError` when the device appears offline
+
+It does **not** automatically retry uploads when connectivity returns; handle retries in your app if you need them.
 
 ## 🎨 Customization
 
@@ -418,6 +424,7 @@ final docId = await FirestoreService.saveUploadMetadata(
 // Stream real-time updates
 FirestoreService.streamUploads(
   firestorePath: 'uploads',
+  filterByUser: FirebaseAuth.instance.currentUser?.uid, // omit / null = no user filter
   orderBy: 'timestamp',
   descending: true,
   limit: 20,
@@ -425,6 +432,8 @@ FirestoreService.streamUploads(
   print('${uploads.length} files available');
 });
 ```
+
+`filterByUser`: pass a UID to restrict to that user. Pass **`null` to load all users’ uploads** (for example an admin dashboard). This matches `FirebaseUploader(filterByCurrentUser: false)`, which passes `null` internally.
 
 ## 🔒 Security Best Practices
 
@@ -444,12 +453,7 @@ FirestoreService.streamUploads(
 
 ## 📱 Platform Support
 
-- ✅ Android
-- ✅ iOS
-- ✅ Web
-- ✅ macOS
-- ✅ Windows
-- ✅ Linux
+The widget uses `dart:io` `File` for picked paths, so it is aimed at **Android, iOS, and desktop** (macOS, Windows, Linux). **Web** is not supported by the current implementation without replacing file handling (for example `XFile` / bytes APIs and conditional imports).
 
 ## 🤝 Contributing
 
@@ -466,9 +470,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 For issues and questions:
-- [GitHub Issues](https://github.com/your-org/firebase_uploader_plus/issues)
-- [Documentation](https://github.com/your-org/firebase_uploader_plus/wiki)
-- [Examples](https://github.com/your-org/firebase_uploader_plus/tree/main/example)
+- [GitHub Issues](https://github.com/vipulbansal/firebase_uploader_plus/issues)
+- [Documentation](https://github.com/vipulbansal/firebase_uploader_plus#readme)
+- [Examples](https://github.com/vipulbansal/firebase_uploader_plus/tree/main/example)
 
 ## 📈 Changelog
 

@@ -15,8 +15,8 @@ Thank you for your interest in contributing to firebase_uploader_plus! We welcom
 
 ## Development Setup
 
-1. Ensure you have Flutter installed (version 3.0.0 or higher)
-2. Run `flutter pub get` to install dependencies
+1. Use **Flutter 3.41.7+** and **Dart 3.11+** (see `pubspec.yaml`). With [FVM](https://fvm.app): `fvm use 3.41.7` then `fvm flutter pub get`.
+2. Run `flutter pub get` (or `fvm flutter pub get`) to install dependencies
 3. Set up Firebase project for testing:
    - Create a new Firebase project
    - Enable Firebase Storage and Firestore
@@ -69,6 +69,14 @@ For feature requests:
 - Describe the use case clearly
 - Explain why it would be beneficial
 - Consider contributing the implementation
+
+## Publishing to pub.dev
+
+1. Commit a clean tree (`git status` should show no unexpected changes).
+2. Use Flutter **3.41.7+** (for example `fvm flutter pub publish`).
+3. Log in once: `dart pub token add https://pub.dev`.
+4. Dry run: `flutter pub publish --dry-run` — fix any validation errors.
+5. Publish: `flutter pub publish` and confirm when prompted.
 
 ## Code of Conduct
 

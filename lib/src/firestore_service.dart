@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'models/upload_metadata.dart';
 
-
 class FirestoreService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -14,13 +13,13 @@ class FirestoreService {
   }) async {
     try {
       final collection = _firestore.collection(firestorePath);
-      final docRef = customDocId != null 
+      final docRef = customDocId != null
           ? collection.doc(customDocId)
           : collection.doc();
 
       final dataToSave = metadata.copyWith(
         id: docRef.id,
-        uploadedBy: metadata.uploadedBy.isEmpty 
+        uploadedBy: metadata.uploadedBy.isEmpty
             ? FirebaseAuth.instance.currentUser?.uid ?? 'anonymous'
             : metadata.uploadedBy,
       );
@@ -54,13 +53,10 @@ class FirestoreService {
     required String firestorePath,
   }) async {
     try {
-      await _firestore
-          .collection(firestorePath)
-          .doc(documentId)
-          .update({
-            'isDeleted': true,
-            'deletedAt': Timestamp.now(),
-          });
+      await _firestore.collection(firestorePath).doc(documentId).update({
+        'isDeleted': true,
+        'deletedAt': Timestamp.now(),
+      });
     } catch (e) {
       throw Exception('Failed to soft delete file: $e');
     }
@@ -72,10 +68,7 @@ class FirestoreService {
     required String firestorePath,
   }) async {
     try {
-      await _firestore
-          .collection(firestorePath)
-          .doc(documentId)
-          .delete();
+      await _firestore.collection(firestorePath).doc(documentId).delete();
     } catch (e) {
       throw Exception('Failed to delete metadata: $e');
     }
@@ -113,15 +106,9 @@ class FirestoreService {
     try {
       Query query = _firestore.collection(firestorePath);
 
-      // Filter by user if specified
+      // Filter by user only when a UID is passed (null = no user filter).
       if (filterByUser != null) {
         query = query.where('uploadedBy', isEqualTo: filterByUser);
-      } else {
-        // Filter by current user if no specific user provided
-        final currentUser = FirebaseAuth.instance.currentUser;
-        if (currentUser != null) {
-          query = query.where('uploadedBy', isEqualTo: currentUser.uid);
-        }
       }
 
       // Filter deleted files
@@ -291,8 +278,11 @@ class FirestoreService {
 
       // Calculate statistics
       int totalFiles = uploads.length;
-      int totalSize = uploads.fold(0, (summ, upload) => summ + upload.fileSizeBytes);
-      
+      int totalSize = uploads.fold(
+        0,
+        (summ, upload) => summ + upload.fileSizeBytes,
+      );
+
       Map<String, int> typeCount = {};
       for (final upload in uploads) {
         typeCount[upload.fileType] = (typeCount[upload.fileType] ?? 0) + 1;
@@ -318,12 +308,12 @@ class FirestoreService {
   }) async {
     try {
       final batch = _firestore.batch();
-      
+
       for (final docId in documentIds) {
         final docRef = _firestore.collection(firestorePath).doc(docId);
         batch.update(docRef, updates);
       }
-      
+
       await batch.commit();
     } catch (e) {
       throw Exception('Failed to batch update metadata: $e');
