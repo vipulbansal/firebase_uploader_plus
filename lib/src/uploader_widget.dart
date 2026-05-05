@@ -352,7 +352,7 @@ class _FirebaseUploaderState extends State<FirebaseUploader> {
 
   Future<void> _pickFiles() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         allowMultiple: widget.enableMultipleFiles,
         allowedExtensions: widget.allowedExtensions.isNotEmpty
             ? widget.allowedExtensions

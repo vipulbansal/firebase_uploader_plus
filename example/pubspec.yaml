@@ -32,9 +32,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.8
-  firebase_core: ^3.13.1
-  firebase_auth: ^5.5.4
+  cupertino_icons: ^1.0.9
+  firebase_core: ^4.7.0
+  firebase_auth: ^6.4.0
   firebase_uploader_plus:
     path: ../
 

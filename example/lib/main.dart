@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,22 +6,105 @@ import 'package:firebase_uploader_plus/firebase_uploader_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  String? bootstrapError;
+  try {
+    await _initializeFirebase();
+  } catch (e) {
+    bootstrapError = e.toString();
+  }
+
+  runApp(MyApp(bootstrapError: bootstrapError));
+}
+
+Future<void> _initializeFirebase() async {
+  if (defaultTargetPlatform != TargetPlatform.android) {
+    await Firebase.initializeApp();
+    return;
+  }
+
+  const appId = String.fromEnvironment('FIREBASE_ANDROID_APP_ID');
+  const projectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
+  const messagingSenderId = String.fromEnvironment(
+    'FIREBASE_MESSAGING_SENDER_ID',
+  );
+  const apiKey = String.fromEnvironment('FIREBASE_ANDROID_API_KEY');
+  const storageBucket = String.fromEnvironment('FIREBASE_STORAGE_BUCKET');
+
+  final hasDartDefines =
+      appId.isNotEmpty &&
+      projectId.isNotEmpty &&
+      messagingSenderId.isNotEmpty &&
+      apiKey.isNotEmpty;
+
+  if (hasDartDefines) {
+    final options = FirebaseOptions(
+      appId: appId,
+      projectId: projectId,
+      messagingSenderId: messagingSenderId,
+      apiKey: apiKey,
+      storageBucket: storageBucket.isEmpty ? null : storageBucket,
+    );
+    await Firebase.initializeApp(options: options);
+    return;
+  }
+
   await Firebase.initializeApp();
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key, this.bootstrapError});
+
+  final String? bootstrapError;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Firebase Uploader Plus Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      home: bootstrapError == null
+          ? const AuthWrapper()
+          : FirebaseSetupScreen(error: bootstrapError!),
+    );
+  }
+}
+
+class FirebaseSetupScreen extends StatelessWidget {
+  const FirebaseSetupScreen({super.key, required this.error});
+
+  final String error;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Firebase setup required')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            const Text(
+              'The example app could not initialize Firebase.\n',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SelectableText(
+              'Do one of these:\n\n'
+              '1) Add android/app/google-services.json for this example app\n'
+              '2) Run with --dart-define values:\n'
+              '   --dart-define=FIREBASE_ANDROID_APP_ID=...\n'
+              '   --dart-define=FIREBASE_PROJECT_ID=...\n'
+              '   --dart-define=FIREBASE_MESSAGING_SENDER_ID=...\n'
+              '   --dart-define=FIREBASE_ANDROID_API_KEY=...\n'
+              '   --dart-define=FIREBASE_STORAGE_BUCKET=... (optional)\n\n'
+              'Then restart the app.',
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Startup error:\n$error',
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+          ],
+        ),
       ),
-      home: const AuthWrapper(),
     );
   }
 }
@@ -55,20 +139,14 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Firebase Uploader Plus Demo'),
-      ),
+      appBar: AppBar(title: const Text('Firebase Uploader Plus Demo')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.cloud_upload,
-                size: 64,
-                color: Colors.blue,
-              ),
+              const Icon(Icons.cloud_upload, size: 64, color: Colors.blue),
               const SizedBox(height: 24),
               const Text(
                 'Firebase Uploader Plus',
@@ -104,9 +182,9 @@ class LoginScreen extends StatelessWidget {
     try {
       await FirebaseAuth.instance.signInAnonymously();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to sign in: $e')));
     }
   }
 
@@ -156,9 +234,11 @@ class _EmailSignInDialogState extends State<EmailSignInDialog> {
                 _isSignUp = !_isSignUp;
               });
             },
-            child: Text(_isSignUp 
-                ? 'Already have account? Sign In' 
-                : 'Need account? Sign Up'),
+            child: Text(
+              _isSignUp
+                  ? 'Already have account? Sign In'
+                  : 'Need account? Sign Up',
+            ),
           ),
         ],
       ),
@@ -169,10 +249,10 @@ class _EmailSignInDialogState extends State<EmailSignInDialog> {
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _handleAuth,
-          child: _isLoading 
+          child: _isLoading
               ? const SizedBox(
-                  width: 16, 
-                  height: 16, 
+                  width: 16,
+                  height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : Text(_isSignUp ? 'Sign Up' : 'Sign In'),
@@ -200,9 +280,9 @@ class _EmailSignInDialogState extends State<EmailSignInDialog> {
       }
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Authentication failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Authentication failed: $e')));
     } finally {
       setState(() {
         _isLoading = false;
@@ -236,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Firebase Uploader Plus'),
@@ -363,10 +443,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: Colors.blue[100],
-                  child: Icon(
-                    Icons.description,
-                    color: Colors.blue[700],
-                  ),
+                  child: Icon(Icons.description, color: Colors.blue[700]),
                 ),
                 title: Text(upload.fileName),
                 subtitle: Text(
@@ -397,16 +474,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.description,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
+                  Icon(Icons.description, size: 64, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text(
-                    'No documents uploaded',
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  Text('No documents uploaded', style: TextStyle(fontSize: 18)),
                   SizedBox(height: 8),
                   Text(
                     'Upload PDFs, Word docs, and text files',

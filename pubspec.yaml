@@ -3,7 +3,7 @@ description: >-
   Flutter package for Firebase Storage uploads with Firestore metadata,
   streams, path helpers, file and camera picking, progress callbacks,
   and a customizable upload list widget.
-version: 1.1.0
+version: 1.1.1
 homepage: https://github.com/vipulbansal/firebase_uploader_plus
 repository: https://github.com/vipulbansal/firebase_uploader_plus
 issue_tracker: https://github.com/vipulbansal/firebase_uploader_plus/issues
@@ -25,18 +25,18 @@ dependencies:
     sdk: flutter
   
   # Firebase Core
-  firebase_core: ^3.13.1
-  firebase_storage: ^12.4.6
-  cloud_firestore: ^5.6.8
-  firebase_auth: ^5.5.4
+  firebase_core: ^4.7.0
+  firebase_storage: ^13.3.0
+  cloud_firestore: ^6.3.0
+  firebase_auth: ^6.4.0
   
   # File & Image Picking
-  file_picker: ^10.1.9
-  image_picker: ^1.1.2
+  file_picker: ^11.0.2
+  image_picker: ^1.2.2
   
   # UI & Utilities
   path: ^1.9.1
-  connectivity_plus: ^6.1.4
+  connectivity_plus: ^7.1.1
   cached_network_image: ^3.4.1
 
 dev_dependencies:

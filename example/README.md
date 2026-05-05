@@ -1,16 +1,21 @@
-# example
+# firebase_uploader_plus example
 
-A new Flutter project.
+This example demonstrates auth + uploads with `firebase_uploader_plus`.
 
-## Getting Started
+## Firebase setup
 
-This project is a starting point for a Flutter application.
+Use one of these approaches before running:
 
-A few resources to get you started if this is your first Flutter project:
+1. Add `android/app/google-services.json` (and platform equivalents as needed), or
+2. Pass Firebase config from CLI:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+flutter run \
+  --dart-define=FIREBASE_ANDROID_APP_ID=... \
+  --dart-define=FIREBASE_PROJECT_ID=... \
+  --dart-define=FIREBASE_MESSAGING_SENDER_ID=... \
+  --dart-define=FIREBASE_ANDROID_API_KEY=... \
+  --dart-define=FIREBASE_STORAGE_BUCKET=...
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+`FIREBASE_STORAGE_BUCKET` is optional.
